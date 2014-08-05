@@ -13,8 +13,8 @@ class MemberSpec extends PlaySpec with OneServerPerSuite with BeforeAndAfter {
 
   "Validation" must {
     "validate the presence of firstName" in DB.withSession { implicit session =>
-        intercept[SQLException] {
-          members += new Member(None, null, "Brown", 1370)
+      intercept[SQLException] {
+        members += new Member(None, null, "Brown", 1370)
       }
     }
 
