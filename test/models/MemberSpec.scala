@@ -1,43 +1,34 @@
 package models
 
 import org.scalatest._
-import scala.slick.driver.H2Driver.simple._
+import play.api.db.slick.Config.driver.simple._
 import scala.slick.jdbc.meta._
-import org.h2.jdbc.JdbcSQLException
+import org.scalatestplus.play._
+import play.api.db.slick.DB
+import java.sql.SQLException
 
-class MemberSpec extends FunSpec with BeforeAndAfter with Matchers {
-  
-  implicit var session: Session = _
-  
+class MemberSpec extends PlaySpec with OneServerPerSuite with BeforeAndAfter {
+
   val members = TableQuery[Members]
-  
-  before {
-    session = Database.forURL("jdbc:h2:mem:test1", driver = "org.h2.Driver").createSession()
-    members.ddl.create
-  }
-  
-  after {
-    session.close()
-  }
-  
-  describe("Validation") {
-    it("should validate the presence of firstName") {
-      intercept[JdbcSQLException] {
-        members += new Member(None, null, "Brown", 1370)
+
+  "Validation" must {
+    "validate the presence of firstName" in DB.withSession { implicit session =>
+        intercept[SQLException] {
+          members += new Member(None, null, "Brown", 1370)
       }
     }
-    
-    it("should validate the presence of lastName") {
-      intercept[JdbcSQLException] {
+
+    "validate the presence of lastName" in DB.withSession { implicit session =>
+      intercept[SQLException] {
         members += new Member(None, "Bobby", null, 1370)
       }
     }
   }
-  
-  describe("Save") {
-    it("should create an ID") {
+
+  "Save" must {
+    " create an ID" in DB.withSession { implicit session =>
       val memberId = (members returning members.map(_.id)) += Member(None, "Bobby", "Brown", 1370)
-      memberId should be > 0
+      memberId must be > 0
     }
   }
 
